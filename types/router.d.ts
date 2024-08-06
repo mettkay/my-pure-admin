@@ -2,6 +2,7 @@
 
 import type { RouteComponent, RouteLocationNormalized } from "vue-router";
 import type { FunctionalComponent } from "vue";
+import type { IconifyIcon } from "@iconify/vue";
 
 declare global {
   interface ToRouteType extends RouteLocationNormalized {
