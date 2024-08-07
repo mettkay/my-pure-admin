@@ -3,7 +3,7 @@ import { storageLocal, isObject } from "@pureadmin/utils";
 
 import enLocale from "element-plus/es/locale/lang/en";
 import zhLocale from "element-plus/es/locale/lang/zh-cn";
-import { App } from "vue";
+import { App, WritableComputedRef } from "vue";
 import { responsiveStorageNameSpace } from "@/config";
 
 const siphonI18n = (function () {
@@ -20,6 +20,70 @@ const siphonI18n = (function () {
     return cache[prefix];
   };
 })();
+
+/**
+ * 国际化转换工具函数（自动读取根目录locales文件夹下文件进行国际化匹配）
+ * @param message message
+ * @returns 转化后的message
+ */
+export function transformI18n(message: any = "") {
+  if (!message) {
+    return "";
+  }
+
+  // 处理存储动态路由的title,格式 {zh:"",en:""}
+  if (typeof message === "object") {
+    const locale: string | WritableComputedRef<string> | any =
+      i18n.global.locale;
+    return message[locale?.value];
+  }
+
+  const key = message.match(/(\S*)\./)?.input;
+
+  if (key && flatI18n("zh-CN").has(key)) {
+    return i18n.global.t.call(i18n.global.locale, message);
+  } else if (!key && Object.hasOwn(siphonI18n("zh-CN"), message)) {
+    // 兼容非嵌套形式的国际化写法
+    return i18n.global.t.call(i18n.global.locale, message);
+  } else {
+    return message;
+  }
+}
+
+/** 获取对象中所有嵌套对象的key键，并将它们用点号分割组成字符串 */
+function getObjectKeys(obj) {
+  const stack = [];
+  const keys: Set<string> = new Set();
+
+  stack.push({ obj, key: "" });
+
+  while (stack.length > 0) {
+    const { obj, key } = stack.pop();
+
+    for (const k in obj) {
+      const newKey = key ? `${key}.${k}` : k;
+
+      if (obj[k] && isObject(obj[k])) {
+        stack.push({ obj: obj[k], key: newKey });
+      } else {
+        keys.add(newKey);
+      }
+    }
+  }
+
+  return keys;
+}
+
+/** 将展开的key缓存 */
+const keysCache: Map<string, Set<string>> = new Map();
+const flatI18n = (prefix = "zh-CN") => {
+  let cache = keysCache.get(prefix);
+  if (!cache) {
+    cache = getObjectKeys(siphonI18n(prefix));
+    keysCache.set(prefix, cache);
+  }
+  return cache;
+};
 
 export const localesConfigs = {
   zh: {

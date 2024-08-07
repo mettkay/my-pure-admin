@@ -14,6 +14,11 @@ import "element-plus/dist/index.css";
 
 const app = createApp(App);
 
+import {
+  IconifyIconOffline,
+} from "./components/ReIcon";
+app.component("IconifyIconOffline", IconifyIconOffline);
+
 getPlatformConfig(app).then(async (config) => {
   setupStore(app);
   app.use(router);
