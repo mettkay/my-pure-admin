@@ -5,7 +5,6 @@ import { useI18n } from "vue-i18n";
 
 export function useLayout() {
   const { $storage, $config } = useGlobal<GlobalPropertiesApi>();
-  console.log('useGlobal<GlobalPropertiesApi>():', useGlobal<GlobalPropertiesApi>());
 
   const initStorage = () => {
     /** 路由 */
