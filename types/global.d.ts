@@ -116,4 +116,15 @@ declare global {
     $storage: ResponsiveStorage;
     $config: PlatformConfigs;
   }
+
+  interface Element {
+    // v-ripple 作用于 src/directives/ripple/index.ts 文件
+    _ripple?: {
+      enabled?: boolean;
+      centered?: boolean;
+      class?: string;
+      circle?: boolean;
+      touched?: boolean;
+    };
+  }
 }
