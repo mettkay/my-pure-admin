@@ -1,11 +1,27 @@
 import { RouteComponent, Router, createRouter } from "vue-router";
-import { ascending, getHistoryMode, formatTwoStageRoutes, formatFlatteningRoutes } from "./util";
+import {
+  ascending,
+  getHistoryMode,
+  formatTwoStageRoutes,
+  formatFlatteningRoutes,
+} from "./util";
 import remainingRouter from "./modules/remaining";
 import NProgress from "@/utils/nprogress";
 import { buildHierarchyTree } from "@pureadmin/utils";
 import { usePermissionStoreHook } from "@/store/modules/permission";
 
+const modules: Record<string, any> = import.meta.glob(
+  ["./modules/**/*.ts", "!./modules/**/remaining.ts"],
+  {
+    eager: true,
+  }
+);
+
 const routes = [];
+
+Object.keys(modules).forEach((key) => {
+  routes.push(modules[key].default);
+});
 
 export const router: Router = createRouter({
   history: getHistoryMode(import.meta.env.VITE_ROUTER_HISTORY),
@@ -20,7 +36,7 @@ export const constantMenus: Array<RouteComponent> = ascending(
 
 /** 重置路由 */
 export function resetRouter() {
-  router.getRoutes().forEach(route => {
+  router.getRoutes().forEach((route) => {
     const { name, meta } = route;
     if (name && router.hasRoute(name) && meta?.backstage) {
       router.removeRoute(name);
@@ -37,7 +53,6 @@ export function resetRouter() {
 const whiteList = ["/login"];
 
 router.afterEach(() => {
-  console.log(router);
   NProgress.done();
 });
 

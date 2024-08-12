@@ -1,7 +1,26 @@
-import { cloneDeep, intersection, isAllEmpty, storageLocal } from "@pureadmin/utils";
+import {
+  cloneDeep,
+  intersection,
+  isAllEmpty,
+  storageLocal,
+} from "@pureadmin/utils";
 import { buildHierarchyTree } from "@/utils/tree";
-import { RouteComponent, RouteRecordRaw, type RouterHistory, createWebHashHistory, createWebHistory } from "vue-router";
+import {
+  RouteComponent,
+  RouteRecordRaw,
+  type RouterHistory,
+  createWebHashHistory,
+  createWebHistory,
+} from "vue-router";
 import { DataInfo, userKey } from "@/utils/auth";
+import { getConfig } from "@/config";
+import { getAsyncRoutes } from "@/api/routes";
+import { router } from "./index";
+import { type menuType, routerArrays } from "@/layout/types";
+import { usePermissionStoreHook } from "@/store/modules/permission";
+
+const IFrame = () => import("@/layout/frame.vue");
+const modulesRoutes = import.meta.glob("/src/views/**/*.{vue,tsx}");
 
 /** 获取路由历史模式 https://next.router.vuejs.org/zh/guide/essentials/history-mode.html */
 function getHistoryMode(routerHistory): RouterHistory {
@@ -49,6 +68,116 @@ function ascending(arr: any[]) {
   );
 }
 
+function addPathMatch() {
+  if (!router.hasRoute("pathMatch")) {
+    router.addRoute({
+      path: "/:pathMatch(.*)",
+      name: "pathMatch",
+      redirect: "/error/404",
+    });
+  }
+}
+
+/** 处理动态路由（后端返回的路由） */
+function handleAsyncRoutes(routeList) {
+  if (!routeList) return;
+  if (routeList.length === 0) {
+    usePermissionStoreHook().handleWholeMenus(routeList);
+  } else {
+    formatFlatteningRoutes(addAsyncRoutes(routeList)).map(
+      (v: RouteRecordRaw) => {
+        // 防止重复添加路由
+        if (
+          router.options.routes[0].children.findIndex(
+            (value) => value.path === v.path
+          ) !== -1
+        ) {
+          return;
+        } else {
+          // 切记将路由push到routes后还需要使用addRoute，这样路由才能正常跳转
+          router.options.routes[0].children.push(v);
+          // 最终路由进行升序
+          ascending(router.options.routes[0].children);
+          if (!router.hasRoute(v?.name)) router.addRoute(v);
+          const flattenRouters: any = router
+            .getRoutes()
+            .find((n) => n.path === "/");
+          router.addRoute(flattenRouters);
+        }
+      }
+    );
+    usePermissionStoreHook().handleWholeMenus(routeList);
+  }
+  // if (!useMultiTagsStoreHook().getMultiTagsCache) {
+  //   useMultiTagsStoreHook().handleTags("equal", [
+  //     ...routerArrays,
+  //     ...usePermissionStoreHook().flatteningRoutes.filter(
+  //       (v) => v?.meta?.fixedTag
+  //     ),
+  //   ]);
+  // }
+  addPathMatch();
+}
+
+/** 初始化路由（`new Promise` 写法防止在异步请求中造成无限循环）*/
+function initRouter() {
+  if (getConfig()?.CachingAsyncRoutes) {
+    // 开启动态路由缓存本地localStorage
+    const key = "async-routes";
+    const asyncRouteList = storageLocal().getItem(key) as any;
+    if (asyncRouteList && asyncRouteList?.length > 0) {
+      return new Promise((resolve) => {
+        handleAsyncRoutes(asyncRouteList);
+        resolve(router);
+      });
+    } else {
+      return new Promise((resolve) => {
+        getAsyncRoutes().then(({ data }) => {
+          handleAsyncRoutes(cloneDeep(data));
+          storageLocal().setItem(key, data);
+          resolve(router);
+        });
+      });
+    }
+  } else {
+    return new Promise((resolve) => {
+      getAsyncRoutes().then(({ data }) => {
+        handleAsyncRoutes(cloneDeep(data));
+        resolve(router);
+      });
+    });
+  }
+}
+
+/** 过滤后端传来的动态路由 重新生成规范路由 */
+function addAsyncRoutes(arrRoutes: Array<RouteRecordRaw>) {
+  if (!arrRoutes || !arrRoutes.length) return;
+  const modulesRoutesKeys = Object.keys(modulesRoutes);
+  arrRoutes.forEach((v: RouteRecordRaw) => {
+    // 将backstage属性加入meta，标识此路由为后端返回路由
+    v.meta.backstage = true;
+    // 父级的redirect属性取值：如果子级存在且父级的redirect属性不存在，默认取第一个子级的path；如果子级存在且父级的redirect属性存在，取存在的redirect属性，会覆盖默认值
+    if (v?.children && v.children.length && !v.redirect)
+      v.redirect = v.children[0].path;
+    // 父级的name属性取值：如果子级存在且父级的name属性不存在，默认取第一个子级的name；如果子级存在且父级的name属性存在，取存在的name属性，会覆盖默认值（注意：测试中发现父级的name不能和子级name重复，如果重复会造成重定向无效（跳转404），所以这里给父级的name起名的时候后面会自动加上`Parent`，避免重复）
+    if (v?.children && v.children.length && !v.name)
+      v.name = (v.children[0].name as string) + "Parent";
+    if (v.meta?.frameSrc) {
+      v.component = IFrame;
+    } else {
+      // 对后端传component组件路径和不传做兼容（如果后端传component组件路径，那么path可以随便写，如果不传，component组件路径会跟path保持一致）
+      const index = v?.component
+        ? modulesRoutesKeys.findIndex((ev) => ev.includes(v.component as any))
+        : modulesRoutesKeys.findIndex((ev) => ev.includes(v.path));
+      v.component = modulesRoutes[modulesRoutesKeys[index]];
+    }
+    if (v?.children && v.children.length) {
+      addAsyncRoutes(v.children);
+    }
+  });
+  return arrRoutes;
+}
+
 /**
  * 一维数组处理成多级嵌套数组（三级及以上的路由全部拍成二级，keep-alive 只支持到二级缓存）
  * https://github.com/pure-admin/vue-pure-admin/issues/67
@@ -66,7 +195,7 @@ function formatTwoStageRoutes(routesList: RouteRecordRaw[]) {
         path: v.path,
         redirect: v.redirect,
         meta: v.meta,
-        children: []
+        children: [],
       });
     } else {
       newRoutesList[0]?.children.push({ ...v });
@@ -135,6 +264,27 @@ function filterNoPermissionTree(data: RouteComponent[]) {
   return filterChildrenTree(newTree);
 }
 
+function handleTopMenu(route) {
+  if (route?.children && route.children.length > 1) {
+    if (route.redirect) {
+      return route.children.filter((cur) => cur.path === route.redirect)[0];
+    } else {
+      return route.children[0];
+    }
+  } else {
+    return route;
+  }
+}
+
+/** 获取所有菜单中的第一个菜单（顶级菜单）*/
+function getTopMenu(tag = false): menuType {
+  const topMenu = handleTopMenu(
+    usePermissionStoreHook().wholeMenus[0]?.children[0]
+  );
+  // tag && useMultiTagsStoreHook().handleTags("push", topMenu);
+  return topMenu;
+}
+
 export {
   getHistoryMode,
   ascending,
@@ -142,4 +292,6 @@ export {
   formatTwoStageRoutes,
   formatFlatteningRoutes,
   filterNoPermissionTree,
+  initRouter,
+  getTopMenu,
 };

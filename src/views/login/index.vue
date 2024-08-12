@@ -7,11 +7,12 @@ import Motion from "./utils/motion";
 import dayIcon from "@/assets/svg/day.svg?component";
 import darkIcon from "@/assets/svg/dark.svg?component";
 import Check from "@iconify-icons/ep/check";
+import { message } from "@/utils/message";
 import globalization from "@/assets/svg/globalization.svg?component";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 import { useTranslationLang } from "@/layout/hooks/useTranslationLang";
-import { toRaw, reactive, computed, ref } from "vue";
+import { toRaw, reactive, computed, ref, watch } from "vue";
 import { ReImageVerify } from "@/components/ReImageVerify";
 import { useUserStoreHook } from "@/store/modules/user";
 import { FormInstance } from "element-plus";
@@ -20,6 +21,8 @@ import { useI18n } from "vue-i18n";
 import User from "@iconify-icons/ri/user-3-fill";
 import Lock from "@iconify-icons/ri/lock-fill";
 import Info from "@iconify-icons/ri/information-line";
+import { useRouter } from "vue-router";
+import { initRouter, getTopMenu } from "@/router/util";
 
 const { dataTheme, overallStyle, dataThemeChange } = useDataThemeChange();
 dataThemeChange(overallStyle.value);
@@ -34,6 +37,7 @@ const loading = ref(false);
 const disabled = ref(false);
 const loginDay = ref(7);
 const imgCode = ref("");
+const router = useRouter();
 
 const ruleFormRef = ref<FormInstance>();
 const currentPage = computed(() => {
@@ -43,12 +47,44 @@ const currentPage = computed(() => {
 const ruleForm = reactive({
   username: "admin",
   password: "admin123",
-  verifyCode: "",
+  verifyCode: computed(()=>imgCode.value),
 });
 
 const onLogin = async (formEl: FormInstance | undefined) => {
-  console.log("formEl:", formEl);
+  if (!formEl) return;
+
+  formEl.validate((valid) => {
+    if (valid) {
+      loading.value = true;
+      useUserStoreHook()
+        .loginByUsername({
+          username: ruleForm.username,
+          password: ruleForm.password,
+        })
+        .then((res) => {
+          if (res.success) {
+            // 获取后端路由
+            return initRouter().then(() => {
+              disabled.value = true;
+              router
+                .push(getTopMenu(true).path)
+                .then(() => {
+                  message(t("login.pureLoginSuccess"), { type: "success" });
+                })
+                .finally(() => (disabled.value = false));
+            });
+          } else {
+            message(t("login.pureLoginFail"), { type: "error" });
+          }
+        })
+        .finally(() => (loading.value = false));
+    }
+  });
 };
+
+watch(imgCode, (value) => {
+  useUserStoreHook().SET_VERIFYCODE(value);
+});
 </script>
 
 <template>
@@ -286,5 +322,57 @@ const onLogin = async (formEl: FormInstance | undefined) => {
 .avatar {
   width: 350px;
   height: 80px;
+}
+
+.login-form h2 {
+  text-transform: uppercase;
+  margin: 15px 0;
+  color: #999;
+  font:
+    bold 200% Consolas,
+    Monaco,
+    monospace;
+}
+
+@media screen and (max-width: 1180px) {
+  .login-container {
+    grid-gap: 9rem;
+  }
+
+  .login-form {
+    width: 290px;
+  }
+
+  .login-form h2 {
+    font-size: 2.4rem;
+    margin: 8px 0;
+  }
+
+  .img img {
+    width: 360px;
+  }
+
+  .avatar {
+    width: 280px;
+    height: 80px;
+  }
+}
+
+@media screen and (max-width: 968px) {
+  .wave {
+    display: none;
+  }
+
+  .img {
+    display: none;
+  }
+
+  .login-container {
+    grid-template-columns: 1fr;
+  }
+
+  .login-box {
+    justify-content: center;
+  }
 }
 </style>

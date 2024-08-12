@@ -9,6 +9,7 @@ import { injectResponsiveStorage } from "@/utils/responsive";
 import { useElementPlus } from "@/plugins/elementPlus";
 
 import "./style/reset.scss";
+import "./style/index.scss";
 
 import "./style/tailwind.css";
 import "element-plus/dist/index.css";
