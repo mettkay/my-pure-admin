@@ -6,7 +6,12 @@ import {
   getKeyList,
   constantMenus,
 } from "../utils";
-import { ascending, filterNoPermissionTree, filterTree, formatFlatteningRoutes } from "@/router/util";
+import {
+  ascending,
+  filterNoPermissionTree,
+  filterTree,
+  formatFlatteningRoutes,
+} from "@/router/utils";
 // import { useMultiTagsStoreHook } from "./multiTags";
 
 export const usePermissionStore = defineStore({
@@ -19,7 +24,7 @@ export const usePermissionStore = defineStore({
     // 整体路由（一维数组格式）
     flatteningRoutes: [],
     // 缓存页面keepAlive
-    cachePageList: []
+    cachePageList: [],
   }),
   actions: {
     /** 组装整体路由生成的菜单 */
@@ -32,10 +37,10 @@ export const usePermissionStore = defineStore({
       );
     },
     cacheOperate({ mode, name }: cacheType) {
-      const delIndex = this.cachePageList.findIndex(v => v === name);
+      const delIndex = this.cachePageList.findIndex((v) => v === name);
       switch (mode) {
         case "refresh":
-          this.cachePageList = this.cachePageList.filter(v => v !== name);
+          this.cachePageList = this.cachePageList.filter((v) => v !== name);
           break;
         case "add":
           this.cachePageList.push(name);
@@ -63,8 +68,8 @@ export const usePermissionStore = defineStore({
     clearAllCachePage() {
       this.wholeMenus = [];
       this.cachePageList = [];
-    }
-  }
+    },
+  },
 });
 
 export function usePermissionStoreHook() {

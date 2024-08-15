@@ -43,6 +43,23 @@ export type menuType = {
   redirect?: string;
 };
 
+export interface setType {
+  sidebar: {
+    opened: boolean;
+    withoutAnimation: boolean;
+    isClickCollapse: boolean;
+  };
+  device: string;
+  fixedHeader: boolean;
+  classes: {
+    hideSidebar: boolean;
+    openSidebar: boolean;
+    withoutAnimation: boolean;
+    mobile: boolean;
+  };
+  hideTabs: boolean;
+}
+
 // export type routeMetaType = {
 //   title?: string;
 //   icon?: string | IconifyIcon;

@@ -1,6 +1,12 @@
 import { ConfigEnv, defineConfig, loadEnv, UserConfigExport } from "vite";
 import vue from "@vitejs/plugin-vue";
-import { alias, root, wrapperEnv } from "./build/utils";
+import {
+  alias,
+  root,
+  wrapperEnv,
+  pathResolve,
+  __APP_INFO__,
+} from "./build/utils";
 import { getPluginsList } from "./build/plugins";
 
 // https://vitejs.dev/config/
@@ -26,6 +32,10 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
       warmup: {
         clientFiles: ["./index.html", "./src/{views,components}/*"],
       },
+    },
+    define: {
+      __INTLIFY_PROD_DEVTOOLS__: false,
+      __APP_INFO__: JSON.stringify(__APP_INFO__),
     },
   };
 };

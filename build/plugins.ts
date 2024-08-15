@@ -5,6 +5,8 @@ import vueJsx from "@vitejs/plugin-vue-jsx";
 import { pathResolve } from "./utils";
 import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
 import { vitePluginFakeServer } from "vite-plugin-fake-server";
+import { genScssMultipleScopeVars } from "../src/layout/theme";
+import { themePreprocessorPlugin } from "@pureadmin/theme";
 
 export function getPluginsList(
   VITE_CDN: boolean,
@@ -24,5 +26,11 @@ export function getPluginsList(
       enableProd: true,
     }),
     svgLoader(),
+    themePreprocessorPlugin({
+      scss: {
+        multipleScopeVars: genScssMultipleScopeVars(),
+        extract: true,
+      },
+    }),
   ];
 }

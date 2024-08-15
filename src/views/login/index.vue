@@ -22,7 +22,7 @@ import User from "@iconify-icons/ri/user-3-fill";
 import Lock from "@iconify-icons/ri/lock-fill";
 import Info from "@iconify-icons/ri/information-line";
 import { useRouter } from "vue-router";
-import { initRouter, getTopMenu } from "@/router/util";
+import { initRouter, getTopMenu } from "@/router/utils";
 
 const { dataTheme, overallStyle, dataThemeChange } = useDataThemeChange();
 dataThemeChange(overallStyle.value);
@@ -66,6 +66,7 @@ const onLogin = async (formEl: FormInstance | undefined) => {
             // 获取后端路由
             return initRouter().then(() => {
               disabled.value = true;
+              console.log('getTopMenu(true).path:', getTopMenu(true).path);
               router
                 .push(getTopMenu(true).path)
                 .then(() => {
@@ -231,13 +232,13 @@ watch(imgCode, (value) => {
                       />
                     </span>
                   </el-checkbox>
-                  <el-button
+                  <!-- <el-button
                     link
                     type="primary"
                     @click="useUserStoreHook().SET_CURRENTPAGE(4)"
                   >
                     {{ t("login.pureForget") }}
-                  </el-button>
+                  </el-button> -->
                 </div>
                 <el-button
                   class="w-full mt-4"
@@ -252,6 +253,7 @@ watch(imgCode, (value) => {
               </el-form-item>
             </Motion>
           </el-form>
+          
         </div>
       </div>
     </div>

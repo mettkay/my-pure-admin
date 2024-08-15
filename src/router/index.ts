@@ -4,7 +4,7 @@ import {
   getHistoryMode,
   formatTwoStageRoutes,
   formatFlatteningRoutes,
-} from "./util";
+} from "./utils";
 import remainingRouter from "./modules/remaining";
 import NProgress from "@/utils/nprogress";
 import { buildHierarchyTree } from "@pureadmin/utils";
@@ -21,6 +21,11 @@ const routes = [];
 
 Object.keys(modules).forEach((key) => {
   routes.push(modules[key].default);
+});
+
+/** 不参与菜单的路由 */
+export const remainingPaths = Object.keys(remainingRouter).map((v) => {
+  return remainingRouter[v].path;
 });
 
 export const router: Router = createRouter({
