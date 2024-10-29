@@ -1,37 +1,49 @@
-import { RouteComponent, Router, createRouter } from "vue-router";
+import { type RouteComponent, type Router, createRouter } from "vue-router";
 import {
   ascending,
   getHistoryMode,
   formatTwoStageRoutes,
   formatFlatteningRoutes,
+  handleAliveRoute,
+  isOneOfArray,
+  initRouter
 } from "./utils";
 import remainingRouter from "./modules/remaining";
 import NProgress from "@/utils/nprogress";
-import { buildHierarchyTree } from "@pureadmin/utils";
+import {
+  buildHierarchyTree,
+  isUrl,
+  openLink,
+  storageLocal
+} from "@pureadmin/utils";
 import { usePermissionStoreHook } from "@/store/modules/permission";
+import { type DataInfo, multipleTabsKey, userKey } from "@/utils/auth";
+import { getConfig } from "@/config";
+import { transformI18n } from "@/plugins/i18n";
+import Cookies from "js-cookie";
 
 const modules: Record<string, any> = import.meta.glob(
   ["./modules/**/*.ts", "!./modules/**/remaining.ts"],
   {
-    eager: true,
+    eager: true
   }
 );
 
 const routes = [];
 
-Object.keys(modules).forEach((key) => {
+Object.keys(modules).forEach(key => {
   routes.push(modules[key].default);
 });
 
 /** 不参与菜单的路由 */
-export const remainingPaths = Object.keys(remainingRouter).map((v) => {
+export const remainingPaths = Object.keys(remainingRouter).map(v => {
   return remainingRouter[v].path;
 });
 
 export const router: Router = createRouter({
   history: getHistoryMode(import.meta.env.VITE_ROUTER_HISTORY),
   routes: routes.concat(...remainingRouter),
-  strict: true,
+  strict: true
 });
 
 /** 用于渲染菜单，保持原始层级 */
@@ -41,7 +53,7 @@ export const constantMenus: Array<RouteComponent> = ascending(
 
 /** 重置路由 */
 export function resetRouter() {
-  router.getRoutes().forEach((route) => {
+  router.getRoutes().forEach(route => {
     const { name, meta } = route;
     if (name && router.hasRoute(name) && meta?.backstage) {
       router.removeRoute(name);
@@ -56,6 +68,64 @@ export function resetRouter() {
 }
 
 const whiteList = ["/login"];
+
+const { VITE_HIDE_HOME } = import.meta.env;
+
+router.beforeEach((to: ToRouteType, _from, next) => {
+  if (to.meta?.keepAlive) {
+    handleAliveRoute(to, "add");
+    if (_from.name === undefined && _from.name === "Redirect") {
+      handleAliveRoute(to);
+    }
+  }
+  NProgress.start();
+  const userInfo = storageLocal().getItem<DataInfo<number>>(userKey);
+
+  const externalLink = isUrl(to.name as string);
+
+  if (!externalLink) {
+    to.matched.some(item => {
+      if (!item.meta.title) return "";
+      const Title = getConfig().Title;
+      if (Title) {
+        document.title = `${transformI18n(item.meta.title)} | ${Title}`;
+      } else {
+        document.title = `${transformI18n(item.meta.title)}`;
+      }
+    });
+  }
+
+  function toCorrectRoute() {
+    whiteList.includes(to.fullPath) ? next(_from.fullPath) : next();
+  }
+
+  if (Cookies.get(multipleTabsKey) && userInfo) {
+    if (to.meta?.roles && !isOneOfArray(to.meta?.roles, userInfo?.roles)) {
+      next({ path: "/error/403" });
+    }
+
+    if (VITE_HIDE_HOME === "true" && to.fullPath === "/welcome") {
+      next({ path: "/error/404" });
+    }
+
+    if (_from?.name) {
+      // name为超链接
+      if (externalLink) {
+        openLink(to?.name as string);
+        NProgress.done();
+      } else {
+        toCorrectRoute();
+      }
+    } else {
+      if (
+        usePermissionStoreHook().wholeMenus.length === 0 &&
+        to.path !== "/login"
+      ) {
+        initRouter().then((router: Router) => {});
+      }
+    }
+  }
+});
 
 router.afterEach(() => {
   NProgress.done();

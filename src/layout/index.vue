@@ -29,13 +29,13 @@ const set: setType = reactive({
       hideSidebar: !set.sidebar.opened,
       openSidebar: set.sidebar.opened,
       withoutAnimation: set.sidebar.withoutAnimation,
-      mobile: set.device === "mobile",
+      mobile: set.device === "mobile"
     };
   }),
 
   hideTabs: computed(() => {
     return $storage?.configure.hideTabs;
-  }),
+  })
 });
 </script>
 

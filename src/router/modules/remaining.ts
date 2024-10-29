@@ -11,7 +11,7 @@ export default [
       showLink: false,
       rank: 101
     }
-  },
+  }
   // {
   //   path: "/redirect",
   //   component: Layout,

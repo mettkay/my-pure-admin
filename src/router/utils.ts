@@ -2,22 +2,23 @@ import {
   cloneDeep,
   intersection,
   isAllEmpty,
-  storageLocal,
+  storageLocal
 } from "@pureadmin/utils";
 import { buildHierarchyTree } from "@/utils/tree";
 import {
-  RouteComponent,
-  RouteRecordRaw,
+  type RouteComponent,
+  type RouteRecordRaw,
   type RouterHistory,
   createWebHashHistory,
-  createWebHistory,
+  createWebHistory
 } from "vue-router";
-import { DataInfo, userKey } from "@/utils/auth";
+import { type DataInfo, userKey } from "@/utils/auth";
 import { getConfig } from "@/config";
 import { getAsyncRoutes } from "@/api/routes";
 import { router } from "./index";
-import { type menuType, routerArrays } from "@/layout/types";
+import type { menuType } from "@/layout/types";
 import { usePermissionStoreHook } from "@/store/modules/permission";
+import { useTimeoutFn } from "@vueuse/core";
 
 const IFrame = () => import("@/layout/frame.vue");
 const modulesRoutes = import.meta.glob("/src/views/**/*.{vue,tsx}");
@@ -73,7 +74,7 @@ function addPathMatch() {
     router.addRoute({
       path: "/:pathMatch(.*)",
       name: "pathMatch",
-      redirect: "/error/404",
+      redirect: "/error/404"
     });
   }
 }
@@ -89,7 +90,7 @@ function handleAsyncRoutes(routeList) {
         // 防止重复添加路由
         if (
           router.options.routes[0].children.findIndex(
-            (value) => value.path === v.path
+            value => value.path === v.path
           ) !== -1
         ) {
           return;
@@ -101,7 +102,7 @@ function handleAsyncRoutes(routeList) {
           if (!router.hasRoute(v?.name)) router.addRoute(v);
           const flattenRouters: any = router
             .getRoutes()
-            .find((n) => n.path === "/");
+            .find(n => n.path === "/");
           router.addRoute(flattenRouters);
         }
       }
@@ -126,12 +127,12 @@ function initRouter() {
     const key = "async-routes";
     const asyncRouteList = storageLocal().getItem(key) as any;
     if (asyncRouteList && asyncRouteList?.length > 0) {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         handleAsyncRoutes(asyncRouteList);
         resolve(router);
       });
     } else {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         getAsyncRoutes().then(({ data }) => {
           handleAsyncRoutes(cloneDeep(data));
           storageLocal().setItem(key, data);
@@ -140,7 +141,7 @@ function initRouter() {
       });
     }
   } else {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       getAsyncRoutes().then(({ data }) => {
         handleAsyncRoutes(cloneDeep(data));
         resolve(router);
@@ -167,8 +168,8 @@ function addAsyncRoutes(arrRoutes: Array<RouteRecordRaw>) {
     } else {
       // 对后端传component组件路径和不传做兼容（如果后端传component组件路径，那么path可以随便写，如果不传，component组件路径会跟path保持一致）
       const index = v?.component
-        ? modulesRoutesKeys.findIndex((ev) => ev.includes(v.component as any))
-        : modulesRoutesKeys.findIndex((ev) => ev.includes(v.path));
+        ? modulesRoutesKeys.findIndex(ev => ev.includes(v.component as any))
+        : modulesRoutesKeys.findIndex(ev => ev.includes(v.path));
       v.component = modulesRoutes[modulesRoutesKeys[index]];
     }
     if (v?.children && v.children.length) {
@@ -195,7 +196,7 @@ function formatTwoStageRoutes(routesList: RouteRecordRaw[]) {
         path: v.path,
         redirect: v.redirect,
         meta: v.meta,
-        children: [],
+        children: []
       });
     } else {
       newRoutesList[0]?.children.push({ ...v });
@@ -267,7 +268,7 @@ function filterNoPermissionTree(data: RouteComponent[]) {
 function handleTopMenu(route) {
   if (route?.children && route.children.length > 1) {
     if (route.redirect) {
-      return route.children.filter((cur) => cur.path === route.redirect)[0];
+      return route.children.filter(cur => cur.path === route.redirect)[0];
     } else {
       return route.children[0];
     }
@@ -277,12 +278,48 @@ function handleTopMenu(route) {
 }
 
 /** 获取所有菜单中的第一个菜单（顶级菜单）*/
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getTopMenu(tag = false): menuType {
   const topMenu = handleTopMenu(
     usePermissionStoreHook().wholeMenus[0]?.children[0]
   );
   // tag && useMultiTagsStoreHook().handleTags("push", topMenu);
   return topMenu;
+}
+
+/** 处理缓存路由（添加、删除、刷新） */
+function handleAliveRoute({ name }: ToRouteType, mode?: string) {
+  switch (mode) {
+    case "add":
+      usePermissionStoreHook().cacheOperate({
+        mode: "add",
+        name
+      });
+      break;
+    case "delete":
+      usePermissionStoreHook().cacheOperate({
+        mode: "delete",
+        name
+      });
+      break;
+    case "refresh":
+      usePermissionStoreHook().cacheOperate({
+        mode: "refresh",
+        name
+      });
+      break;
+    default:
+      usePermissionStoreHook().cacheOperate({
+        mode: "delete",
+        name
+      });
+      useTimeoutFn(() => {
+        usePermissionStoreHook().cacheOperate({
+          mode: "add",
+          name
+        });
+      }, 100);
+  }
 }
 
 export {
@@ -294,4 +331,6 @@ export {
   filterNoPermissionTree,
   initRouter,
   getTopMenu,
+  handleAliveRoute,
+  isOneOfArray
 };
