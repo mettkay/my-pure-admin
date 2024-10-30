@@ -6,21 +6,30 @@ import {
   formatFlatteningRoutes,
   handleAliveRoute,
   isOneOfArray,
-  initRouter
+  initRouter,
+  findRouteByPath,
+  getTopMenu
 } from "./utils";
 import remainingRouter from "./modules/remaining";
 import NProgress from "@/utils/nprogress";
 import {
   buildHierarchyTree,
+  isAllEmpty,
   isUrl,
   openLink,
   storageLocal
 } from "@pureadmin/utils";
 import { usePermissionStoreHook } from "@/store/modules/permission";
-import { type DataInfo, multipleTabsKey, userKey } from "@/utils/auth";
+import {
+  type DataInfo,
+  multipleTabsKey,
+  removeToken,
+  userKey
+} from "@/utils/auth";
 import { getConfig } from "@/config";
 import { transformI18n } from "@/plugins/i18n";
 import Cookies from "js-cookie";
+import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 
 const modules: Record<string, any> = import.meta.glob(
   ["./modules/**/*.ts", "!./modules/**/remaining.ts"],
@@ -121,8 +130,50 @@ router.beforeEach((to: ToRouteType, _from, next) => {
         usePermissionStoreHook().wholeMenus.length === 0 &&
         to.path !== "/login"
       ) {
-        initRouter().then((router: Router) => {});
+        initRouter().then((router: Router) => {
+          if (!useMultiTagsStoreHook().getMultiTagsCache) {
+            const { path } = to;
+            const route = findRouteByPath(
+              path,
+              router.options.routes[0].children
+            );
+            getTopMenu(true);
+
+            if (route && route.meta?.title) {
+              if (isAllEmpty(route.parentId) && route.meta?.backstage) {
+                // 此处为动态顶级路由（目录）
+                const { path, name, meta } = route.children[0];
+                useMultiTagsStoreHook().handleTags("push", {
+                  path,
+                  name,
+                  meta
+                });
+              } else {
+                const { path, name, meta } = route;
+                useMultiTagsStoreHook().handleTags("push", {
+                  path,
+                  name,
+                  meta
+                });
+              }
+            }
+          }
+
+          if (isAllEmpty(to.name)) router.push(to.fullPath);
+        });
+        toCorrectRoute();
       }
+    }
+  } else {
+    if (to.path !== "/login") {
+      if (whiteList.indexOf(to.path) !== -1) {
+        next();
+      } else {
+        removeToken();
+        next({ path: "/login" });
+      }
+    } else {
+      next();
     }
   }
 });

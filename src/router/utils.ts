@@ -19,6 +19,7 @@ import { router } from "./index";
 import type { menuType } from "@/layout/types";
 import { usePermissionStoreHook } from "@/store/modules/permission";
 import { useTimeoutFn } from "@vueuse/core";
+import { isProxy, toRaw } from "vue";
 
 const IFrame = () => import("@/layout/frame.vue");
 const modulesRoutes = import.meta.glob("/src/views/**/*.{vue,tsx}");
@@ -322,6 +323,27 @@ function handleAliveRoute({ name }: ToRouteType, mode?: string) {
   }
 }
 
+/** 查找对应 `path` 的路由信息 */
+function findRouteByPath(path: string, routes: RouteRecordRaw[]) {
+  let res = routes.find((item: { path: string }) => item.path == path);
+  if (res) {
+    return isProxy(res) ? toRaw(res) : res;
+  } else {
+    for (let i = 0; i < routes.length; i++) {
+      if (
+        routes[i].children instanceof Array &&
+        routes[i].children.length > 0
+      ) {
+        res = findRouteByPath(path, routes[i].children);
+        if (res) {
+          return isProxy(res) ? toRaw(res) : res;
+        }
+      }
+    }
+    return null;
+  }
+}
+
 export {
   getHistoryMode,
   ascending,
@@ -332,5 +354,6 @@ export {
   initRouter,
   getTopMenu,
   handleAliveRoute,
-  isOneOfArray
+  isOneOfArray,
+  findRouteByPath
 };
