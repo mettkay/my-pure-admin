@@ -9,35 +9,51 @@ import {
   ref,
   toRaw,
   computed,
-  useAttrs,
+  useAttrs
 } from "vue";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import path from "path";
 import { useNav } from "@/layout/hooks/useNav";
 import { ReText } from "@/components/ReText";
 
+import ArrowUp from "@iconify-icons/ep/arrow-up-bold";
+import EpArrowDown from "@iconify-icons/ep/arrow-down-bold";
+import ArrowLeft from "@iconify-icons/ep/arrow-left-bold";
+import ArrowRight from "@iconify-icons/ep/arrow-right-bold";
+import { getConfig } from "@/config";
+
 const attrs = useAttrs();
 const { layout, isCollapse, tooltipEffect, getDivStyle } = useNav();
 
 const props = defineProps({
   item: {
-    type: Object as PropType<menuType>,
+    type: Object as PropType<menuType>
   },
   isNest: {
     type: Boolean,
-    default: false,
+    default: false
   },
   basePath: {
     type: String,
-    default: "",
-  },
+    default: ""
+  }
+});
+
+const expandCloseIcon = computed(() => {
+  if (!getConfig()?.MenuArrowIconNoTransition) return "";
+  return {
+    "expand-close-icon": useRenderIcon(EpArrowDown),
+    "expand-open-icon": useRenderIcon(ArrowUp),
+    "collapse-close-icon": useRenderIcon(ArrowRight),
+    "collapse-open-icon": useRenderIcon(ArrowLeft)
+  };
 });
 
 const getNoDropdownStyle = computed((): CSSProperties => {
   return {
     width: "100%",
     display: "flex",
-    alignItems: "center",
+    alignItems: "center"
   };
 });
 
@@ -51,7 +67,7 @@ const getSubMenuIconStyle = computed((): CSSProperties => {
         ? "0 5px 0 0"
         : isCollapse.value
           ? "0 auto"
-          : "0 5px 0 0",
+          : "0 5px 0 0"
   };
 });
 
@@ -79,7 +95,6 @@ function hasOneShowingChild(children: menuType[] = [], parent: menuType) {
 }
 
 function resolvePath(routePath) {
-  console.log("routePath:", routePath);
   const httpReg = /^http(s?):\/\//;
   if (httpReg.test(routePath) || httpReg.test(props.basePath)) {
     return routePath || props.basePath;
@@ -139,7 +154,7 @@ function resolvePath(routePath) {
           <ReText
             :tippyProps="{
               offset: [0, -10],
-              theme: tooltipEffect,
+              theme: tooltipEffect
             }"
             class="!w-full !text-inherit"
           >
@@ -150,6 +165,59 @@ function resolvePath(routePath) {
       </template>
     </el-menu-item>
   </SidebarLinkItem>
+  <el-sub-menu
+    v-else
+    ref="subMenu"
+    teleported
+    :index="resolvePath(item.path)"
+    v-bind="expandCloseIcon"
+  >
+    <template #title>
+      <div
+        v-if="toRaw(item.meta.icon)"
+        :style="getSubMenuIconStyle"
+        class="sub-menu-icon"
+      >
+        <component :is="useRenderIcon(item.meta && toRaw(item.meta.icon))" />
+      </div>
+      <ReText
+        v-if="
+          layout === 'mix' && toRaw(item.meta.icon)
+            ? !isCollapse || item?.pathList?.length !== 2
+            : !(
+                layout === 'vertical' &&
+                isCollapse &&
+                toRaw(item.meta.icon) &&
+                item.parentId === null
+              )
+        "
+        :tippyProps="{
+          offset: [0, -10],
+          theme: tooltipEffect
+        }"
+        :class="{
+          '!w-full': true,
+          '!text-inherit': true,
+          '!pl-4':
+            layout !== 'horizontal' &&
+            isCollapse &&
+            !toRaw(item.meta.icon) &&
+            item.parentId === null
+        }"
+      >
+        {{ transformI18n(item.meta.title) }}
+      </ReText>
+      <SidebarExtraIcon v-if="!isCollapse" :extraIcon="item.meta.extraIcon" />
+    </template>
+    <sidebar-item
+      v-for="child in item.children"
+      :key="child.path"
+      :is-nest="true"
+      :item="child"
+      :base-path="resolvePath(child.path)"
+      class="nest-menu"
+    />
+  </el-sub-menu>
 </template>
 
 <style lang="scss" scoped></style>

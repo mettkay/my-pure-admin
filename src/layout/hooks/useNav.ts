@@ -1,15 +1,14 @@
 import { useEpThemeStoreHook } from "@/store/modules/epTheme";
 import { useGlobal } from "@pureadmin/utils";
-import { computed, CSSProperties } from "vue";
+import { computed, type CSSProperties } from "vue";
 import { emitter } from "@/utils/mitt";
 import { getConfig } from "@/config";
-import { router, remainingPaths } from "@/router";
+import { remainingPaths } from "@/router";
 import { transformI18n } from "@/plugins/i18n";
-import { RouteMeta } from "vue-router";
+import type { RouteMeta } from "vue-router";
 import { useAppStoreHook } from "@/store/modules/app";
 import { storeToRefs } from "pinia";
 import { usePermissionStoreHook } from "@/store/modules/permission";
-
 
 export function useNav() {
   const pureApp = useAppStoreHook();
@@ -22,7 +21,7 @@ export function useNav() {
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
-      overflow: "hidden",
+      overflow: "hidden"
     };
   });
 
@@ -31,7 +30,7 @@ export function useNav() {
     return (locale, t) => {
       return {
         background: locale === t ? useEpThemeStoreHook().epThemeColor : "",
-        color: locale === t ? "#f4f4f5" : "#000",
+        color: locale === t ? "#f4f4f5" : "#000"
       };
     };
   });
@@ -102,6 +101,6 @@ export function useNav() {
     handleResize,
     getLogo,
     getDropdownItemStyle,
-    getDropdownItemClass,
+    getDropdownItemClass
   };
 }

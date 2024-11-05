@@ -4,7 +4,6 @@ import {
   store,
   router,
   resetRouter,
-  routerArrays,
   storageLocal
 } from "../utils";
 import {

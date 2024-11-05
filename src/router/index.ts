@@ -1,4 +1,9 @@
-import { type RouteComponent, type Router, createRouter } from "vue-router";
+import {
+  type RouteComponent,
+  type RouteRecordRaw,
+  type Router,
+  createRouter
+} from "vue-router";
 import {
   ascending,
   getHistoryMode,
@@ -44,6 +49,16 @@ Object.keys(modules).forEach(key => {
   routes.push(modules[key].default);
 });
 
+/** 导出处理后的静态路由（三级及以上的路由全部拍成二级） */
+export const constantRoutes: Array<RouteRecordRaw> = formatTwoStageRoutes(
+  formatFlatteningRoutes(buildHierarchyTree(ascending(routes.flat(Infinity))))
+);
+
+/** 用于渲染菜单，保持原始层级 */
+export const constantMenus: Array<RouteComponent> = ascending(
+  routes.flat(Infinity)
+).concat(...remainingRouter);
+
 /** 不参与菜单的路由 */
 export const remainingPaths = Object.keys(remainingRouter).map(v => {
   return remainingRouter[v].path;
@@ -51,14 +66,9 @@ export const remainingPaths = Object.keys(remainingRouter).map(v => {
 
 export const router: Router = createRouter({
   history: getHistoryMode(import.meta.env.VITE_ROUTER_HISTORY),
-  routes: routes.concat(...remainingRouter),
+  routes: constantRoutes.concat(...remainingRouter),
   strict: true
 });
-
-/** 用于渲染菜单，保持原始层级 */
-export const constantMenus: Array<RouteComponent> = ascending(
-  routes.flat(Infinity)
-).concat(...remainingRouter);
 
 /** 重置路由 */
 export function resetRouter() {

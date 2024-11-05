@@ -22,7 +22,7 @@ const {
   isCollapse,
   tooltipEffect,
   menuSelect,
-  toggleSideBar,
+  toggleSideBar
 } = useNav();
 
 const subMenuData = ref([]);
@@ -32,7 +32,6 @@ const menuData = computed(() => {
     ? subMenuData.value
     : usePermissionStoreHook().wholeMenus;
 });
-console.log("menuData:", menuData);
 
 const loading = computed(() =>
   pureApp.layout === "mix" ? false : menuData.value.length === 0 ? true : false

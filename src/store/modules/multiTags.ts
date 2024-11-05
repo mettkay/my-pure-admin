@@ -46,6 +46,13 @@ export const useMultiTagsStore = defineStore({
         storageLocal().removeItem(`${responsiveStorageNameSpace()}tags`);
       }
     },
+    tagsCache(multiTags) {
+      this.getMultiTagsCache &&
+        storageLocal().setItem(
+          `${responsiveStorageNameSpace()}tags`,
+          multiTags
+        );
+    },
     handleTags<T>(
       mode: string,
       value?: T | multiType,

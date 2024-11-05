@@ -47,26 +47,26 @@ const currentPage = computed(() => {
 const ruleForm = reactive({
   username: "admin",
   password: "admin123",
-  verifyCode: computed(()=>imgCode.value),
+  verifyCode: computed(() => imgCode.value)
 });
 
 const onLogin = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
 
-  formEl.validate((valid) => {
+  formEl.validate(valid => {
     if (valid) {
       loading.value = true;
       useUserStoreHook()
         .loginByUsername({
           username: ruleForm.username,
-          password: ruleForm.password,
+          password: ruleForm.password
         })
-        .then((res) => {
+        .then(res => {
           if (res.success) {
             // 获取后端路由
             return initRouter().then(() => {
               disabled.value = true;
-              console.log('getTopMenu(true).path:', getTopMenu(true).path);
+              console.log("getTopMenu(true).path:", getTopMenu(true).path);
               router
                 .push(getTopMenu(true).path)
                 .then(() => {
@@ -83,7 +83,7 @@ const onLogin = async (formEl: FormInstance | undefined) => {
   });
 };
 
-watch(imgCode, (value) => {
+watch(imgCode, value => {
   useUserStoreHook().SET_VERIFYCODE(value);
 });
 </script>
@@ -162,8 +162,8 @@ watch(imgCode, (value) => {
                   {
                     required: true,
                     message: transformI18n($t('login.pureUsernameReg')),
-                    trigger: 'blur',
-                  },
+                    trigger: 'blur'
+                  }
                 ]"
                 prop="username"
               >
@@ -214,7 +214,7 @@ watch(imgCode, (value) => {
                           width: loginDay < 10 ? '10px' : '16px',
                           outline: 'none',
                           background: 'none',
-                          appearance: 'none',
+                          appearance: 'none'
                         }"
                       >
                         <option value="1">1</option>
@@ -225,7 +225,7 @@ watch(imgCode, (value) => {
                       <IconifyIconOffline
                         v-tippy="{
                           content: t('login.pureRememberInfo'),
-                          placement: 'top',
+                          placement: 'top'
                         }"
                         :icon="Info"
                         class="ml-1"
@@ -253,7 +253,6 @@ watch(imgCode, (value) => {
               </el-form-item>
             </Motion>
           </el-form>
-          
         </div>
       </div>
     </div>

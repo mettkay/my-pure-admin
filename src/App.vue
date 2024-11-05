@@ -4,7 +4,7 @@ import en from "element-plus/es/locale/lang/en";
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 import plusEn from "plus-pro-components/es/locale/lang/en";
 import plusZhCn from "plus-pro-components/es/locale/lang/zh-cn";
-import { ElConfigProvider } from 'element-plus'
+import { ElConfigProvider } from "element-plus";
 
 import { storageLocal } from "@pureadmin/utils";
 
@@ -24,6 +24,4 @@ const currentLocale = computed(() => {
   </el-config-provider>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

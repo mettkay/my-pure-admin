@@ -16,10 +16,11 @@ import { type DataInfo, userKey } from "@/utils/auth";
 import { getConfig } from "@/config";
 import { getAsyncRoutes } from "@/api/routes";
 import { router } from "./index";
-import type { menuType } from "@/layout/types";
+import { routerArrays, type menuType } from "@/layout/types";
 import { usePermissionStoreHook } from "@/store/modules/permission";
 import { useTimeoutFn } from "@vueuse/core";
 import { isProxy, toRaw } from "vue";
+import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 
 const IFrame = () => import("@/layout/frame.vue");
 const modulesRoutes = import.meta.glob("/src/views/**/*.{vue,tsx}");
@@ -110,14 +111,14 @@ function handleAsyncRoutes(routeList) {
     );
     usePermissionStoreHook().handleWholeMenus(routeList);
   }
-  // if (!useMultiTagsStoreHook().getMultiTagsCache) {
-  //   useMultiTagsStoreHook().handleTags("equal", [
-  //     ...routerArrays,
-  //     ...usePermissionStoreHook().flatteningRoutes.filter(
-  //       (v) => v?.meta?.fixedTag
-  //     ),
-  //   ]);
-  // }
+  if (!useMultiTagsStoreHook().getMultiTagsCache) {
+    useMultiTagsStoreHook().handleTags("equal", [
+      ...routerArrays,
+      ...usePermissionStoreHook().flatteningRoutes.filter(
+        v => v?.meta?.fixedTag
+      )
+    ]);
+  }
   addPathMatch();
 }
 
