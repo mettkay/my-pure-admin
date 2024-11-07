@@ -17,7 +17,7 @@ import "element-plus/dist/index.css";
 const app = createApp(App);
 
 import * as directives from "@/directives";
-Object.keys(directives).forEach((key) => {
+Object.keys(directives).forEach(key => {
   app.directive(key, (directives as { [key: string]: Directive })[key]);
 });
 
@@ -30,7 +30,7 @@ import "tippy.js/themes/light.css";
 import VueTippy from "vue-tippy";
 app.use(VueTippy);
 
-getPlatformConfig(app).then(async (config) => {
+getPlatformConfig(app).then(async config => {
   setupStore(app);
   app.use(router);
   injectResponsiveStorage(app, config);

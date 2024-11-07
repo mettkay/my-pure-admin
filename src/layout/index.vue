@@ -1,19 +1,24 @@
 <script setup lang="ts">
-import { reactive, computed, ref } from "vue";
+import { reactive, computed, ref, defineComponent, h } from "vue";
 import { setType } from "./types";
 import { useAppStoreHook } from "@/store/modules/app";
 import { useSettingStoreHook } from "@/store/modules/settings";
 import {
   deviceDetection,
   entries,
+  useDark,
   useGlobal,
   useResizeObserver
 } from "@pureadmin/utils";
 import { useLayout } from "./hooks/useLayout";
+import LayNavbar from "./components/lay-navbar/index.vue";
 import NavVertical from "./components/lay-sidebar/NavVertical.vue";
+import NavHorizontal from "./components/lay-sidebar/NavHorizontal.vue";
+import LayTag from "./components/lay-tag/index.vue";
 
 const { layout } = useLayout();
 const appWrapperRef = ref();
+const { isDark } = useDark();
 const isMobile = deviceDetection();
 const pureSetting = useSettingStoreHook();
 const { $storage } = useGlobal<GlobalPropertiesApi>();
@@ -89,6 +94,37 @@ useResizeObserver(appWrapperRef, entries => {
     isAutoCloseSidebar = false;
   }
 });
+
+const LayHeader = defineComponent({
+  name: "LayHeader",
+  render() {
+    return h(
+      "div",
+      {
+        class: { "fixed-header": set.fixedHeader },
+        style: [
+          set.hideTabs && layout.value.includes("horizontal")
+            ? isDark.value
+              ? "box-shadow: 0 1px 4px #0d0d0d"
+              : "box-shadow: 0 1px 4px rgba(0,21,41,0.08)"
+            : ""
+        ]
+      },
+      {
+        default: () => [
+          !pureSetting.hiddenSideBar &&
+          (layout.value.includes("vertical") || layout.value.includes("mix"))
+            ? h(LayNavbar)
+            : null,
+          !pureSetting.hiddenSideBar && layout.value.includes("horizontal")
+            ? h(NavHorizontal)
+            : null,
+          h(LayTag)
+        ]
+      }
+    );
+  }
+});
 </script>
 
 <template>
@@ -108,6 +144,17 @@ useResizeObserver(appWrapperRef, entries => {
         (layout.includes('vertical') || layout.includes('mix'))
       "
     />
+
+    <div
+      :class="[
+        'main-container',
+        pureSetting.hiddenSideBar ? 'main-hidden' : ''
+      ]"
+    >
+      <div v-if="set.fixedHeader">
+        <LayHeader />
+      </div>
+    </div>
   </div>
 </template>
 
