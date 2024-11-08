@@ -8,10 +8,14 @@ import { transformI18n } from "@/plugins/i18n";
 import type { RouteMeta } from "vue-router";
 import { useAppStoreHook } from "@/store/modules/app";
 import { storeToRefs } from "pinia";
+import { useFullscreen } from "@vueuse/core";
 import { usePermissionStoreHook } from "@/store/modules/permission";
+import Fullscreen from "@iconify-icons/ri/fullscreen-fill";
+import ExitFullscreen from "@iconify-icons/ri/fullscreen-exit-fill";
 
 export function useNav() {
   const pureApp = useAppStoreHook();
+  const { isFullscreen, toggle } = useFullscreen();
   const tooltipEffect = getConfig()?.TooltipEffect ?? "light";
   const { wholeMenus } = storeToRefs(usePermissionStoreHook());
 
@@ -94,6 +98,10 @@ export function useNav() {
     isCollapse,
     getDivStyle,
     device,
+    toggle,
+    isFullscreen,
+    Fullscreen,
+    ExitFullscreen,
     menuSelect,
     tooltipEffect,
     changeTitle,
