@@ -12,7 +12,7 @@ function handleSearch() {
 <template>
   <div>
     <div
-      class="search-container w-[40px] h-[48px] flex-col cursor-pointer navbar-bg-hover"
+      class="search-container w-[40px] h-[48px] flex-c cursor-pointer navbar-bg-hover"
       @click="handleSearch"
     >
       <iconifyIconOffline icon="ri:search-line" />

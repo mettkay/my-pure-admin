@@ -17,6 +17,9 @@ importers:
       '@vueuse/motion':
         specifier: ^2.2.3
         version: 2.2.3(rollup@4.18.0)(vue@3.4.38(typescript@5.5.3))
+      animate.css:
+        specifier: ^4.1.1
+        version: 4.1.1
       axios:
         specifier: ^1.7.2
         version: 1.7.2
@@ -44,6 +47,9 @@ importers:
       pinia:
         specifier: ^2.2.1
         version: 2.2.1(typescript@5.5.3)(vue@3.4.38(typescript@5.5.3))
+      pinyin-pro:
+        specifier: ^3.25.0
+        version: 3.26.0
       plus-pro-components:
         specifier: ^0.1.14
         version: 0.1.14(element-plus@2.7.8(vue@3.4.38(typescript@5.5.3)))(vue@3.4.38(typescript@5.5.3))
@@ -53,6 +59,9 @@ importers:
       responsive-storage:
         specifier: ^2.2.0
         version: 2.2.0
+      sortablejs:
+        specifier: ^1.15.3
+        version: 1.15.3
       tippy.js:
         specifier: ^6.3.7
         version: 6.3.7
@@ -1082,6 +1091,9 @@ packages:
 
   ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
+
+  animate.css@4.1.1:
+    resolution: {integrity: sha512-+mRmCTv6SbCmtYJCN4faJMNFVNN5EuCTTprDTAo7YzIGji2KADmakjVA3+8mVDkZ2Bf09vayB35lSQIex2+QaQ==}
 
   ansi-regex@5.0.1:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
@@ -2165,6 +2177,9 @@ packages:
       typescript:
         optional: true
 
+  pinyin-pro@3.26.0:
+    resolution: {integrity: sha512-HcBZZb0pvm0/JkPhZHWA5Hqp2cWHXrrW/WrV+OtaYYM+kf35ffvZppIUuGmyuQ7gDr1JDJKMkbEE+GN0wfMoGg==}
+
   pirates@4.0.6:
     resolution: {integrity: sha512-saLsH7WeYYPiD25LDuLRRY/i+6HaPYr6G1OUlN39otzkSTxKnubR9RTxS3/Kk50s1g2JTgFwWQDQyplC5/SHZg==}
     engines: {node: '>= 6'}
@@ -2512,8 +2527,8 @@ packages:
     resolution: {integrity: sha512-ZA6oR3T/pEyuqwMgAKT0/hAv8oAXckzbkmR0UkUosQ+Mc4RxGoJkRmwHgHufaenlyAgE1Mxgpdcrf75y6XcnDg==}
     engines: {node: '>=14.16'}
 
-  sortablejs@1.15.2:
-    resolution: {integrity: sha512-FJF5jgdfvoKn1MAKSdGs33bIqLi3LmsgVTliuX6iITj834F+JRQZN90Z93yql8h0K2t0RwDPBmxwlbZfDcxNZA==}
+  sortablejs@1.15.3:
+    resolution: {integrity: sha512-zdK3/kwwAK1cJgy1rwl1YtNTbRmc8qW/+vgXf75A7NHag5of4pyI6uK86ktmQETyWRH7IGaE73uZOOBcGxgqZg==}
 
   source-map-js@1.2.0:
     resolution: {integrity: sha512-itJW8lvSA0TXEphiRoawsCksnlf8SyvmFzIhltqAHluXd88pkCd+cXJVHTDwdCr0IzwptSm035IHQktUu1QUMg==}
@@ -3823,6 +3838,8 @@ snapshots:
       json-schema-traverse: 0.4.1
       uri-js: 4.4.1
 
+  animate.css@4.1.1: {}
+
   ansi-regex@5.0.1: {}
 
   ansi-regex@6.0.1: {}
@@ -4983,6 +5000,8 @@ snapshots:
     optionalDependencies:
       typescript: 5.5.3
 
+  pinyin-pro@3.26.0: {}
+
   pirates@4.0.6: {}
 
   pkg-types@1.1.3:
@@ -4996,7 +5015,7 @@ snapshots:
       '@element-plus/icons-vue': 2.3.1(vue@3.4.38(typescript@5.5.3))
       element-plus: 2.7.8(vue@3.4.38(typescript@5.5.3))
       lodash-es: 4.17.21
-      sortablejs: 1.15.2
+      sortablejs: 1.15.3
       vue: 3.4.38(typescript@5.5.3)
 
   popmotion@11.0.5:
@@ -5321,7 +5340,7 @@ snapshots:
   slash@5.1.0:
     optional: true
 
-  sortablejs@1.15.2: {}
+  sortablejs@1.15.3: {}
 
   source-map-js@1.2.0: {}
 

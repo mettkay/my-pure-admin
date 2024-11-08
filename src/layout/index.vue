@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import "@/components/ReIcon/src/offlineIcon";
 import { reactive, computed, ref, defineComponent, h } from "vue";
 import { setType } from "./types";
 import { useAppStoreHook } from "@/store/modules/app";
