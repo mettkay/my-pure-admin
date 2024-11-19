@@ -4,15 +4,30 @@ import LaySearch from "../lay-search/index.vue";
 import LaySidebarBreadCrumb from "../lay-sidebar/components/SidebarBreadCrumb.vue";
 import { useTranslationLang } from "@/layout/hooks/useTranslationLang";
 import LaySidebarFullScreen from "../lay-sidebar/components/SidebarFullScreen.vue";
+import LayNotice from "../lay-notice/index.vue";
 
 import GlobalizationIcon from "@/assets/svg/globalization.svg?component";
 import AccountSettingsIcon from "@iconify-icons/ri/user-settings-line";
 import LogoutCircleRLine from "@iconify-icons/ri/logout-circle-r-line";
 import Setting from "@iconify-icons/ri/settings-3-line";
 import Check from "@iconify-icons/ep/check";
+import { computed } from "vue";
 
-const { layout, device, getDropdownItemStyle, getDropdownItemClass } = useNav();
+const {
+  userAvatar,
+  username,
+  layout,
+  device,
+  logout,
+  toAccountSettings,
+  getDropdownItemStyle,
+  getDropdownItemClass
+} = useNav();
 const { t, locale, translationCh, translationEn } = useTranslationLang();
+
+const avatarsStyle = computed(() => {
+  return username.value ? { marginRight: "10px" } : "";
+});
 </script>
 
 <template>
@@ -58,6 +73,33 @@ const { t, locale, translationCh, translationEn } = useTranslationLang();
       </el-dropdown>
 
       <LaySidebarFullScreen id="full-screen" />
+
+      <LayNotice id="header-notice" />
+
+      <el-dropdown trigger="click">
+        <span class="el-dropdown-link navbar-bg-hover select-none">
+          <img :src="userAvatar" :style="avatarsStyle" alt="" />
+          <span v-if="username" class="dark:text-white">{{ username }}</span>
+        </span>
+        <template #dropdown>
+          <el-dropdown-menu class="logout">
+            <el-dropdown-item @click="toAccountSettings">
+              <IconifyIconOffline
+                :icon="AccountSettingsIcon"
+                style="margin: 5px"
+              />
+              {{ t("buttons.pureAccountSettings") }}
+            </el-dropdown-item>
+            <el-dropdown-item @click="logout">
+              <IconifyIconOffline
+                :icon="LogoutCircleRLine"
+                style="margin: 5px"
+              />
+              {{ t("buttons.pureLoginOut") }}
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
     </div>
   </div>
 </template>

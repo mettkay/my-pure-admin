@@ -1,9 +1,9 @@
 import { useEpThemeStoreHook } from "@/store/modules/epTheme";
-import { useGlobal } from "@pureadmin/utils";
+import { isAllEmpty, useGlobal } from "@pureadmin/utils";
 import { computed, type CSSProperties } from "vue";
 import { emitter } from "@/utils/mitt";
 import { getConfig } from "@/config";
-import { remainingPaths } from "@/router";
+import router, { remainingPaths } from "@/router";
 import { transformI18n } from "@/plugins/i18n";
 import type { RouteMeta } from "vue-router";
 import { useAppStoreHook } from "@/store/modules/app";
@@ -12,6 +12,8 @@ import { useFullscreen } from "@vueuse/core";
 import { usePermissionStoreHook } from "@/store/modules/permission";
 import Fullscreen from "@iconify-icons/ri/fullscreen-fill";
 import ExitFullscreen from "@iconify-icons/ri/fullscreen-exit-fill";
+import { useUserStoreHook } from "@/store/modules/user";
+import Avatar from "@/assets/user.jpg";
 
 export function useNav() {
   const pureApp = useAppStoreHook();
@@ -28,6 +30,26 @@ export function useNav() {
       overflow: "hidden"
     };
   });
+
+  const userAvatar = computed(() => {
+    return isAllEmpty(useUserStoreHook()?.avatar)
+      ? Avatar
+      : useUserStoreHook()?.avatar;
+  });
+
+  const username = computed(() => {
+    return isAllEmpty(useUserStoreHook()?.nickname)
+      ? useUserStoreHook()?.username
+      : useUserStoreHook()?.nickname;
+  });
+
+  function logout() {
+    useUserStoreHook().logOut();
+  }
+
+  function toAccountSettings() {
+    router.push({ name: "AccountSettings" });
+  }
 
   /** 设置国际化选中后的样式 */
   const getDropdownItemStyle = computed(() => {
@@ -99,6 +121,10 @@ export function useNav() {
     getDivStyle,
     device,
     toggle,
+    userAvatar,
+    username,
+    logout,
+    toAccountSettings,
     isFullscreen,
     Fullscreen,
     ExitFullscreen,

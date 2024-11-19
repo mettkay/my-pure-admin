@@ -11,7 +11,7 @@ export default [
       showLink: false,
       rank: 101
     }
-  }
+  },
   // {
   //   path: "/redirect",
   //   component: Layout,
@@ -39,14 +39,14 @@ export default [
   //     rank: 103
   //   }
   // },
-  // {
-  //   path: "/account-settings",
-  //   name: "AccountSettings",
-  //   component: () => import("@/views/account-settings/index.vue"),
-  //   meta: {
-  //     title: $t("buttons.pureAccountSettings"),
-  //     showLink: false,
-  //     rank: 104
-  //   }
-  // }
+  {
+    path: "/account-settings",
+    name: "AccountSettings",
+    component: () => import("@/views/account-settings/index.vue"),
+    meta: {
+      title: $t("buttons.pureAccountSettings"),
+      showLink: false,
+      rank: 104
+    }
+  }
 ] satisfies Array<RouteConfigsTable>;
