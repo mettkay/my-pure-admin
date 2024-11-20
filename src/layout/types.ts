@@ -1,5 +1,6 @@
 const { VITE_HIDE_HOME } = import.meta.env;
-import { RouteMeta } from "vue-router";
+import type { IconifyIcon } from "@iconify/vue/dist/offline.js";
+import type { RouteMeta } from "vue-router";
 
 export const routerArrays: Array<RouteConfigs> =
   VITE_HIDE_HOME === "false"
@@ -8,9 +9,9 @@ export const routerArrays: Array<RouteConfigs> =
           path: "/welcome",
           meta: {
             title: "menus.pureHome",
-            icon: "ep:home-filled",
-          },
-        },
+            icon: "ep:home-filled"
+          }
+        }
       ]
     : [];
 
@@ -67,6 +68,14 @@ export interface setType {
 //   savedPosition?: boolean;
 //   auths?: Array<string>;
 // };
+
+export type tagsViewsType = {
+  icon: string | IconifyIcon;
+  text: string;
+  divided: boolean;
+  disabled: boolean;
+  show: boolean;
+};
 
 export type themeColorsType = {
   color: string;

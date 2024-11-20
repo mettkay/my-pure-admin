@@ -47,6 +47,10 @@ export function useNav() {
     useUserStoreHook().logOut();
   }
 
+  function onPanel() {
+    emitter.emit("openPanel");
+  }
+
   function toAccountSettings() {
     router.push({ name: "AccountSettings" });
   }
@@ -121,6 +125,7 @@ export function useNav() {
     getDivStyle,
     device,
     toggle,
+    onPanel,
     userAvatar,
     username,
     logout,

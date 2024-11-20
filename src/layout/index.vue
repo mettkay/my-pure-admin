@@ -13,10 +13,14 @@ import {
 } from "@pureadmin/utils";
 import { useLayout } from "./hooks/useLayout";
 import LayNavbar from "./components/lay-navbar/index.vue";
+import LayContent from "./components/lay-content/index.vue";
 import NavVertical from "./components/lay-sidebar/NavVertical.vue";
 import NavHorizontal from "./components/lay-sidebar/NavHorizontal.vue";
 import LayTag from "./components/lay-tag/index.vue";
+import { useI18n } from "vue-i18n";
+import BackTopIcon from "@/assets/svg/back_top.svg?component";
 
+const { t } = useI18n();
 const { layout } = useLayout();
 const appWrapperRef = ref();
 const { isDark } = useDark();
@@ -154,7 +158,20 @@ const LayHeader = defineComponent({
     >
       <div v-if="set.fixedHeader">
         <LayHeader />
+
+        <LayContent :fixed-header="set.fixedHeader" />
       </div>
+      <el-scrollbar v-else>
+        <el-backtop
+          :title="t('buttons.pureBackTop')"
+          target=".main-container .el-scrollbar__wrap"
+        >
+          <BackTopIcon />
+        </el-backtop>
+        <LayHeader />
+        <!-- 主体内容 -->
+        <LayContent :fixed-header="set.fixedHeader" />
+      </el-scrollbar>
     </div>
   </div>
 </template>
