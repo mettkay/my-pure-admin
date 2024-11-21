@@ -6,9 +6,11 @@ import { getTopMenu, handleAliveRoute } from "@/router/utils";
 import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 import { usePermissionStoreHook } from "@/store/modules/permission";
 import { useSettingStoreHook } from "@/store/modules/settings";
+import { emitter } from "@/utils/mitt";
 import ArrowLeftSLine from "@iconify-icons/ri/arrow-left-s-line";
+import ArrowRightSLine from "@iconify-icons/ri/arrow-right-s-line";
 import { isAllEmpty, isEqual } from "@pureadmin/utils";
-import { nextTick, toRaw } from "vue";
+import { nextTick, onMounted, toRaw } from "vue";
 import { ref, unref } from "vue";
 
 const {
@@ -379,6 +381,43 @@ function deleteMenu(item, tag?: string) {
   deleteDynamicTag(item, item.path, tag);
   handleAliveRoute(route as ToRouteType);
 }
+
+function dynamicRouteTag(value: string): void {
+  const hasValue = multiTags.value.some(item => {
+    return item.path === value;
+  });
+
+  function concatPath(arr: object[], value: string) {
+    if (!hasValue) {
+      arr.forEach((arrItem: any) => {
+        if (arrItem.path === value) {
+          useMultiTagsStoreHook().handleTags("push", {
+            path: value,
+            meta: arrItem.meta,
+            name: arrItem.name
+          });
+        } else {
+          if (arrItem.children && arrItem.children.length > 0) {
+            concatPath(arrItem.children, value);
+          }
+        }
+      });
+    }
+  }
+  concatPath(router.options.routes as any, value);
+}
+
+onMounted(() => {
+  showMenuModel(route.fullPath);
+
+  //  接收侧边栏切换传递过来的参数
+  emitter.on("changLayoutRoute", indexPath => {
+    dynamicRouteTag(indexPath);
+    setTimeout(() => {
+      showMenuModel(indexPath);
+    });
+  });
+});
 </script>
 
 <template>
@@ -399,7 +438,7 @@ function deleteMenu(item, tag?: string) {
           :ref="'dynamic' + index"
           :key="index"
           :class="[
-            'scorll-item is-closable',
+            'scroll-item is-closable',
             linkIsActive(item),
             showModel === 'chrome' && 'chrome-item',
             isFixedTag(item) && 'fixed-tag'
@@ -433,9 +472,29 @@ function deleteMenu(item, tag?: string) {
               :class="[scheduleIsActive(item)]"
             />
           </template>
+          <div v-else class="chrome-tab">
+            <div class="chrome-tab__bg">
+              <TagChrome />
+            </div>
+            <span class="tag-title">
+              {{ transformI18n(item.meta.title) }}
+            </span>
+            <span
+              v-if="isFixedTag(item) ? false : index !== 0"
+              class="chrome-close-btn"
+              @click.stop="deleteMenu(item)"
+            >
+              <IconifyIconOffline :icon="Close" />
+            </span>
+            <span class="chrome-tab-divider" />
+          </div>
         </div>
       </div>
     </div>
+
+    <span v-show="isShowArrow" class="arrow-right">
+      <IconifyIconOffline :icon="ArrowRightSLine" @click="handleScroll(-200)" />
+    </span>
   </div>
 </template>
 
