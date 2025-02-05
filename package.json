@@ -8,6 +8,7 @@
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview"
   },
+  "packageManager": "pnpm@9.12.3",
   "dependencies": {
     "@pureadmin/utils": "^2.4.7",
     "@vueuse/core": "^10.11.0",

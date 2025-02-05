@@ -80,7 +80,7 @@ class PureHttp {
               const data = getToken();
               if (data) {
                 const now = new Date().getTime();
-                const expired = parseInt(data.expires) - now <= 0;
+                const expired = data.expires - now <= 0;
                 if (expired) {
                   if (!PureHttp.isRefreshing) {
                     PureHttp.isRefreshing = true;
